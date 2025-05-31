@@ -34,38 +34,6 @@ docker run -p 8080:80 ghcr.io/OWNER/REPO:latest
 
 Note: You may need to authenticate to GitHub Container Registry first if the repository is private.
 
-## Docker Container
-
-### Building and Running Locally
-
-You can run this application in a Docker container:
-
-```bash
-# Build the Docker image
-docker build -t translator-app .
-
-# Run the container
-docker run -p 8080:80 translator-app
-```
-
-Then visit http://localhost:8080 in your browser.
-
-### Automated Builds via GitHub Actions
-
-This repository includes a GitHub Actions workflow that automatically builds and publishes the Docker image to GitHub Container Registry when changes are pushed to the main branch or new tags are created.
-
-To use the pre-built container from GitHub Container Registry:
-
-```bash
-# Pull the image (replace OWNER/REPO with actual repository path)
-docker pull ghcr.io/OWNER/REPO:latest
-
-# Run the container
-docker run -p 8080:80 ghcr.io/OWNER/REPO:latest
-```
-
-Note: You may need to authenticate to GitHub Container Registry first if the repository is private.
-
 ## Features
 
 - Connects to your Open-WebUI instance
