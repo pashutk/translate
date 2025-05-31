@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="Translator Assistant - Offline Capable LLM Chat">
+    <title>Translator Assistant</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Add Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            950: '#172554'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            }
+
+            .scrollbar-hidden::-webkit-scrollbar {
+                display: none;
+            }
+            .scrollbar-hidden {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            
+            /* Safe area insets for iOS devices */
+            .safe-bottom {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            
+            .pb-safe {
+                padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+            }
+            
+            .pt-safe {
+                padding-top: max(0.75rem, env(safe-area-inset-top));
+            }
+            
+            .mt-safe {
+                margin-top: env(safe-area-inset-top);
+            }
+            
+            .safe-top {
+                padding-top: env(safe-area-inset-top);
+            }
+            
+            .safe-area-insets {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+                padding-left: env(safe-area-inset-left);
+                padding-right: env(safe-area-inset-right);
+            }
+            
+            /* Markdown styling */
+            .markdown-content h1, 
+            .markdown-content h2, 
+            .markdown-content h3, 
+            .markdown-content h4, 
+            .markdown-content h5, 
+            .markdown-content h6 {
+                font-weight: 600;
+                margin-top: 1em;
+                margin-bottom: 0.5em;
+                line-height: 1.25;
+            }
+            
+            .markdown-content h1 { font-size: 1.5em; }
+            .markdown-content h2 { font-size: 1.4em; }
+            .markdown-content h3 { font-size: 1.3em; }
+            .markdown-content h4 { font-size: 1.2em; }
+            .markdown-content h5 { font-size: 1.1em; }
+            .markdown-content h6 { font-size: 1em; }
+            
+            .markdown-content p {
+                margin-bottom: 0.5em;
+            }
+            
+            .markdown-content p:last-child {
+                margin-bottom: 0;
+            }
+            
+            .markdown-content ul, 
+            .markdown-content ol {
+                margin-top: 0.5em;
+                margin-bottom: 0.5em;
+                padding-left: 1.5em;
+            }
+            
+            .markdown-content ul {
+                list-style-type: disc;
+            }
+            
+            .markdown-content ol {
+                list-style-type: decimal;
+            }
+            
+            .markdown-content li {
+                margin-bottom: 0.25em;
+            }
+            
+            .markdown-content code {
+                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+                padding: 0.2em 0.4em;
+                margin: 0;
+                font-size: 0.85em;
+                background-color: rgba(0,0,0,0.06);
+                border-radius: 3px;
+                white-space: pre-wrap;
+            }
+            
+            .dark .markdown-content code {
+                background-color: rgba(255,255,255,0.1);
+            }
+            
+            .markdown-content pre {
+                padding: 1em;
+                overflow-x: auto;
+                background-color: rgba(0,0,0,0.06);
+                border-radius: 3px;
+                margin: 0.5em 0;
+            }
+            
+            .dark .markdown-content pre {
+                background-color: rgba(255,255,255,0.05);
+            }
+            
+            .markdown-content pre code {
+                background-color: transparent;
+                padding: 0;
+                margin: 0;
+                font-size: 0.9em;
+                white-space: pre;
+            }
+            
+            .markdown-content blockquote {
+                padding-left: 1em;
+                border-left: 4px solid #e5e7eb;
+                color: #6b7280;
+                margin: 0.5em 0;
+            }
+            
+            .dark .markdown-content blockquote {
+                border-left-color: #4b5563;
+                color: #9ca3af;
+            }
+            
+            .markdown-content a {
+                color: #2563eb;
+                text-decoration: underline;
+            }
+            
+            .dark .markdown-content a {
+                color: #60a5fa;
+            }
+            
+            .markdown-content img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 3px;
+            }
+            
+            .markdown-content hr {
+                height: 1px;
+                background-color: #e5e7eb;
+                border: none;
+                margin: 1em 0;
+            }
+            
+            .dark .markdown-content hr {
+                background-color: #4b5563;
+            }
+        }
+    </style>
+    
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 overflow-hidden h-screen">
+    <div class="relative flex flex-col h-full max-w-2xl mx-auto bg-white dark:bg-gray-800 shadow-lg">
+        <!-- Header - Fixed position to stay visible when keyboard appears -->
+        <header class="sticky top-0 z-10 py-3 px-4 pt-safe border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl font-bold text-gray-800 dark:text-white">Translator Assistant</h1>
+                <div class="flex items-center space-x-2">
+                    <span id="connection-status" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        Online
+                    </span>
+                    <button id="settings-button" aria-label="Settings" class="p-1 rounded-full text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <div id="chat-container" class="flex-1 overflow-y-auto p-4 pb-28 scrollbar-hidden" style="overflow-y: auto !important; height: calc(100vh - 60px);">
+                <div id="messages" class="flex flex-col space-y-4"></div>
+                <!-- Explicit scroll target with moderate height -->
+                <div id="scroll-anchor" class="h-12 w-full invisible"></div>
+            </div>
+            
+            <!-- Input Area - Fixed at bottom -->
+            <div class="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto border-t border-gray-200 dark:border-gray-700 p-3 pb-safe bg-white dark:bg-gray-800">
+                <form id="chat-form" class="flex space-x-2">
+                    <textarea 
+                        id="user-input" 
+                        class="flex-1 resize-none rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent focus:outline-none scrollbar-hidden"
+                        placeholder="Type your message..." 
+                        required 
+                        autofocus
+                        rows="1"></textarea>
+                    <button 
+                        id="send-button" 
+                        type="submit" 
+                        class="px-4 py-2 text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
+                        Send
+                    </button>
+                </form>
+            </div>
+        </main>
+        
+        <!-- Offline Indicator -->
+        <div id="offline-indicator" class="hidden bg-red-100 text-red-800 text-sm px-3 py-2 text-center border-t border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-800">
+            <p>You're offline. Responses will be limited to cached capabilities.</p>
+        </div>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Settings</h2>
+            <form id="settings-form" class="space-y-4">
+                <div>
+                    <label for="api-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        OpenWebUI Endpoint URL:
+                    </label>
+                    <input 
+                        type="url" 
+                        id="api-url" 
+                        name="apiUrl" 
+                        placeholder="https://example.com/api/chat" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="api-key" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        API Key:
+                    </label>
+                    <input 
+                        type="password" 
+                        id="api-key" 
+                        name="apiKey" 
+                        placeholder="Your API key"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="model-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Model:
+                    </label>
+                    <input 
+                        type="text" 
+                        id="model-name" 
+                        name="modelName" 
+                        placeholder="gpt-4.1"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="system-prompt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        System Prompt:
+                    </label>
+                    <textarea 
+                        id="system-prompt" 
+                        name="systemPrompt" 
+                        placeholder="You are a helpful translation assistant..." 
+                        rows="3" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button 
+                        type="button" 
+                        id="close-settings" 
+                        class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+                        Cancel
+                    </button>
+                    <button 
+                        type="submit" 
+                        class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
+                        Save Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="app.js" defer></script>
+    <script>
+        // Register service worker for offline capability
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
